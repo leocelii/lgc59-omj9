@@ -8,6 +8,7 @@ def isIdentity(matrix, epsilon):
     matrixSize = matrix.shape[0] # grabs the first dimension of the array
     identityMatrix = np.eye(matrixSize) # creates identity matrix
     return np.allclose(matrix, identityMatrix, atol=epsilon) # checks if matrix is equal to identity matrix within given tolerance, atol=epsilon
+
 # creates the transpose of the given matrix
 def findTranspose(matrix, size):
     transpose = [row[:] for row in matrix] # copies matrix using list comprehension
@@ -20,8 +21,7 @@ def findTranspose(matrix, size):
 def isOrthogonal(matrix, epsilon):
     transpose = findTranspose(matrix, matrix.shape[0])
     productMatrix = np.dot(matrix, transpose)
-    identityMatrix = np.eye(matrix.shape[0])
-    return np.allclose(productMatrix, identityMatrix, atol=epsilon)
+    return isIdentity(productMatrix, epsilon)
 
  ## Steps for check_SOn implementation:
     ## Is matrix orthongal && is determinant of matrix = 1? (both true == m ∊ SO(n))
