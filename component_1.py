@@ -1,7 +1,6 @@
 import numpy as np
 import mathplotlib
 import math
-from typing import TypeVar
 
 ##Validating Rotations
 # compares given matrix against the identity matrix within a tolerance denoted by epsilon parameter
