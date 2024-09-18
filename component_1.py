@@ -1,5 +1,7 @@
 import numpy as np
+import mathplotlib
 import math
+from typing import TypeVar
 
 ##Validating Rotations
 # compares given matrix against the identity matrix within a tolerance denoted by epsilon parameter
@@ -14,6 +16,13 @@ def findTranspose(matrix, size):
         for j in range(size):
             transpose[i][j] == matrix[j][i] # switches element to mirror position, row for column and column for row.
     return transpose # returns transpose
+
+# checks if given matrix is orthogonal
+def isOrthogonal(matrix, epsilon):
+    transpose = findTranspose(matrix, matrix.shape[0])
+    productMatrix = np.dot(matrix, transpose)
+    identityMatrix = np.eye(matrix.shape[0])
+    return np.allclose(productMatrix, identityMatrix, atol=epsilon)
 
  ## Steps for check_SOn implementation:
     ## Is matrix orthongal && is determinant of matrix = 1? (both true == m ∊ SO(n))
@@ -72,8 +81,22 @@ def check_quaternion(vector: v, float: epsilon=0.01) -> bool:
     ##          - check that x1*x3 + x2*x4 = 0
     ## if both conditions met than return true, otherwise false
 def check_SEn(matrix: m, float: epsilon=0.01) -> bool:  
-  
+    matrix = np.array(matrix)
+    bottomRow = matrix[-1]
+    orthogonalSE2 = np.array([0, 0, 1])
+    orthogonalSE3 = np.array([0, 0, 0, 1])
+    if not((bottomRow == orthogonalSE2) or (bottomRow == orthogonalSE3)): #checks if the bottom row is of form 0, 0, 1 (SE(2)) or 0, 0, 0, 1 (SE(3)).
+        return False
+    orthogonal = matrix[:2, :2] if (matrix.shape[0] == 3) else matrix[:3, :3]
+    if not (isOrthogonal(orthogonal, epsilon)):
+        return False
+    return True
+    
 def main():
   # don't think we need main?
+    matrix1 = np.array([[1, 0], [0, 1]])
+    if (isIdentity(matrix1)):
+        print("matrix is identity")
+        
 if __name__=="__main__":
     main()
