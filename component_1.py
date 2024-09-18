@@ -35,7 +35,6 @@ def isOrthogonal(matrix, epsilon):
 def check_SOn(matrix: m, float: epsilon=0.01) -> bool:
     # Finding transpose and multiplying with original and check if resultant matrix is identity
     matrix = np.array(matrix)
-    transpose = matrix.T # we may have to code this because they said no rotation specific functions?
     transpose = findTranspose(matrix, matrix.shape[0]) 
     productMatrix = np.dot(matrix, transpose)
     if not (isIdentity(productMatrix, epsilon)):
