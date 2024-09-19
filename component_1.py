@@ -60,7 +60,7 @@ def check_SOn(matrix, epsilon=0.01) -> bool:
     ## v (1,0,0,0)
     ## sum = 1^2 + 0^2 + 0^2 + 0^2
     ## if sum of the squares is 1 than the vector is in S^3
-def check_quaternion(vector: v, float: epsilon=0.01) -> bool: 
+def check_quaternion(vector, epsilon=0.01) -> bool: 
     vectorArray = np.array(vector)
     if (len(vectorArray) == 4):
         sum1 = (vectorArray[0] ** 2) + (vectorArray[1] ** 2) + (vectorArray[2] ** 2) + (vectorArray[3] ** 2)
@@ -82,7 +82,7 @@ def check_quaternion(vector: v, float: epsilon=0.01) -> bool:
     ##          - check that x3^2 + x4^2 = 1
     ##          - check that x1*x3 + x2*x4 = 0
     ## if both conditions met than return true, otherwise false
-def check_SEn(matrix: m, float: epsilon=0.01) -> bool:  
+def check_SEn(matrix, epsilon=0.01) -> bool:  
     matrix = np.array(matrix)
     bottomRow = matrix[-1]
     orthogonalSE2 = np.array([0, 0, 1])
