@@ -46,6 +46,7 @@ def check_SOn(matrix, epsilon=0.01) -> bool:
 
     # Finding the determinant
     determinant = np.linalg.det(matrix)
+        #are we allowed to use numpy.linalg.det?
     if not ((determinant >= 1.0 - epsilon) and (determinant <= 1.0 + epsilon)): # within epsilon precision tolerance
         return False # determinant is not within the boudaries of epsilon parameter, [0.99 - 1.01]
     return True
@@ -99,6 +100,51 @@ def check_SEn(matrix, epsilon=0.01) -> bool:
     if not (isOrthogonal(orthogonal, epsilon)):
         return False
     return True
+
+def random_rotation_matrix(naive: bool) -> np.ndarray:
+    if naive:
+        # Step 1: Generate random Euler angles
+        roll = np.random.uniform(0, 2 * np.pi)
+        pitch = np.random.uniform(0, 2 * np.pi)
+        yaw = np.random.uniform(0, 2 * np.pi)
+        # Rotation matrix for roll (rotation around x-axis)
+        R_x = np.array([
+            [1, 0, 0],
+            [0, np.cos(roll), -np.sin(roll)],
+            [0, np.sin(roll), np.cos(roll)]
+        ])
+        
+        # Rotation matrix for pitch (y)
+        R_y = np.array([
+            [np.cos(pitch), 0, np.sin(pitch)],
+            [0, 1, 0],
+            [-np.sin(pitch), 0, np.cos(pitch)]
+        ])
+        
+        # Rotation matrix for yaw (z)
+        R_z = np.array([
+            [np.cos(yaw), -np.sin(yaw), 0],
+            [np.sin(yaw), np.cos(yaw), 0],
+            [0, 0, 1]
+        ])
+        # Step 3: Combine the rotation matrices. The order of multiplication matters (R = R_z * R_y * R_x)
+        R = R_z @ R_y @ R_x
+        return R
+    else:
+        #Generate a random quaternion
+        u1, u2, u3 = np.random.uniform(0, 1, 3)
+        q1 = np.sqrt(1 - u1) * np.sin(2 * np.pi * u2)
+        q2 = np.sqrt(1 - u1) * np.cos(2 * np.pi * u2)
+        q3 = np.sqrt(u1) * np.sin(2 * np.pi * u3)
+        q4 = np.sqrt(u1) * np.cos(2 * np.pi * u3)
+        #Convert the quaternion to a 3x3 rotation matrix
+        R = np.array([
+            [1 - 2 * (q3**2 + q4**2), 2 * (q2 * q3 - q4 * q1), 2 * (q2 * q4 + q3 * q1)],
+            [2 * (q2 * q3 + q4 * q1), 1 - 2 * (q2**2 + q4**2), 2 * (q3 * q4 - q2 * q1)],
+            [2 * (q2 * q4 - q3 * q1), 2 * (q3 * q4 + q2 * q1), 1 - 2 * (q2**2 + q3**2)]
+        ])
+
+        return R
     
 def main():
   # don't think we need main?
@@ -120,5 +166,8 @@ def main():
                           [0, 0, 0, 1]])
     if (check_SEn(matrixSEn)):
         print("matrix is SEn")
+
+        
+
 if __name__=="__main__":
     main()
