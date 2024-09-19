@@ -46,10 +46,8 @@ def check_SOn(matrix, epsilon=0.01) -> bool:
 
     # Finding the determinant
     determinant = np.linalg.det(matrix)
-    if not ((determinant >= 1 - epsilon) and (determinant <= 1 + epsilon)): # within epsilon precision tolerance
+    if not ((determinant >= 1.0 - epsilon) and (determinant <= 1.0 + epsilon)): # within epsilon precision tolerance
         return False # determinant is not within the boudaries of epsilon parameter, [0.99 - 1.01]
-
-    print("Matrix is an element of SO(n).")
     return True
 
 ## Steps for check_quaternion implementation
@@ -63,8 +61,8 @@ def check_SOn(matrix, epsilon=0.01) -> bool:
 def check_quaternion(vector, epsilon=0.01) -> bool: 
     vectorArray = np.array(vector)
     if (len(vectorArray) == 4):
-        sum1 = (vectorArray[0] ** 2) + (vectorArray[1] ** 2) + (vectorArray[2] ** 2) + (vectorArray[3] ** 2)
-        if not((sum >= 1 - epsilon) and (sum <= 1 + epsilon)): # within epsilon precision tolerance
+        sum1 = float((vectorArray[0] ** 2) + (vectorArray[1] ** 2) + (vectorArray[2] ** 2) + (vectorArray[3] ** 2))
+        if not((sum1 >= 1.0 - epsilon) and (sum1 <= 1.0 + epsilon)): # within epsilon precision tolerance
             return False
     else:
         return False
@@ -87,8 +85,16 @@ def check_SEn(matrix, epsilon=0.01) -> bool:
     bottomRow = matrix[-1]
     orthogonalSE2 = np.array([0, 0, 1])
     orthogonalSE3 = np.array([0, 0, 0, 1])
-    if not((bottomRow == orthogonalSE2) or (bottomRow == orthogonalSE3)): #checks if the bottom row is of form 0, 0, 1 (SE(2)) or 0, 0, 0, 1 (SE(3)).
+
+    if (len(bottomRow) == 3):
+        if not ((bottomRow == orthogonalSE2).all()): # checks if the bottom row is of form (0, 0, 1) SE(2)).
+            return False
+    elif (len(bottomRow) == 4): 
+        if not ((bottomRow == orthogonalSE3).all()): #checks if the bottom row is of form (0, 0, 0, 1) SE(3)).
+            return False
+    else:
         return False
+
     orthogonal = matrix[:2, :2] if (matrix.shape[0] == 3) else matrix[:3, :3] # the variable orthogonal will be assigned to either the top left 2x2 matrix of SE(2) matrix, or top left 3x3 matrix of SE(3) matrix.
     if not (isOrthogonal(orthogonal, epsilon)):
         return False
@@ -105,6 +111,14 @@ def main():
                           [ 0, 0, 1]])
     if (check_SOn(matrixSOn)):
         print("matrix is SO(n)")
-                
+    matrixQ = np.array([.5, .5, .5, .5])
+    if (check_quaternion(matrixQ)):
+        print("matrix is quat")
+    matrixSEn = np.array([[1, 0, 0, 2],
+                          [0, 1, 0, 3],
+                          [0, 0, 1, 4],
+                          [0, 0, 0, 1]])
+    if (check_SEn(matrixSEn)):
+        print("matrix is SEn")
 if __name__=="__main__":
     main()
