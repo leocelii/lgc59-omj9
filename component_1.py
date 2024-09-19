@@ -1,5 +1,5 @@
 import numpy as np
-import mathplotlib
+import matplotlib
 import math
 
 ##Validating Rotations
@@ -12,9 +12,11 @@ def isIdentity(matrix, epsilon):
 # creates the transpose of the given matrix
 def findTranspose(matrix, size):
     transpose = [row[:] for row in matrix] # copies matrix using list comprehension
+    transpose = np.array(transpose)
     for i in range(size):
         for j in range(size):
-            transpose[i][j] == matrix[j][i] # switches element to mirror position, row for column and column for row.
+            transpose[i][j] = matrix[j][i] # switches element to mirror position, row for column and column for row.
+    print(transpose)
     return transpose # returns transpose
 
 # checks if given matrix is orthogonal
@@ -32,10 +34,12 @@ def isOrthogonal(matrix, epsilon):
     ##    - does determinant = 1?
     ##        - use np.linalg.det
     ##        - if det = 1, return true, otherwise false.
-def check_SOn(matrix: m, float: epsilon=0.01) -> bool:
+    
+def check_SOn(matrix, epsilon=0.01) -> bool:
     # Finding transpose and multiplying with original and check if resultant matrix is identity
     matrix = np.array(matrix)
-    transpose = findTranspose(matrix, matrix.shape[0]) 
+    print(matrix)
+    transpose = findTranspose(matrix, matrix.shape[0])
     productMatrix = np.dot(matrix, transpose)
     if not (isIdentity(productMatrix, epsilon)):
         return False
@@ -56,15 +60,15 @@ def check_SOn(matrix: m, float: epsilon=0.01) -> bool:
     ## v (1,0,0,0)
     ## sum = 1^2 + 0^2 + 0^2 + 0^2
     ## if sum of the squares is 1 than the vector is in S^3
-def check_quaternion(vector: v, float: epsilon=0.01) -> bool: 
-    vectorArray = np.array(vector)
-    if (len(vectorArray) == 4):
-        sum1 = (vectorArray[0] ** 2) + (vectorArray[1] ** 2) + (vectorArray[2] ** 2) + (vectorArray[3] ** 2)
-        if not((sum >= 1 - epsilon) and (sum <= 1 + epsilon)): # within epsilon precision tolerance
-            return False
-    else:
-        return False
-    return True    
+# def check_quaternion(vector: v, float: epsilon=0.01) -> bool: 
+#     vectorArray = np.array(vector)
+#     if (len(vectorArray) == 4):
+#         sum1 = (vectorArray[0] ** 2) + (vectorArray[1] ** 2) + (vectorArray[2] ** 2) + (vectorArray[3] ** 2)
+#         if not((sum >= 1 - epsilon) and (sum <= 1 + epsilon)): # within epsilon precision tolerance
+#             return False
+#     else:
+#         return False
+#     return True    
 
 ## Steps for check_SE(n) implementation
     ## is the matrix in SE(2) or SE(3)?
@@ -78,23 +82,28 @@ def check_quaternion(vector: v, float: epsilon=0.01) -> bool:
     ##          - check that x3^2 + x4^2 = 1
     ##          - check that x1*x3 + x2*x4 = 0
     ## if both conditions met than return true, otherwise false
-def check_SEn(matrix: m, float: epsilon=0.01) -> bool:  
-    matrix = np.array(matrix)
-    bottomRow = matrix[-1]
-    orthogonalSE2 = np.array([0, 0, 1])
-    orthogonalSE3 = np.array([0, 0, 0, 1])
-    if not((bottomRow == orthogonalSE2) or (bottomRow == orthogonalSE3)): #checks if the bottom row is of form 0, 0, 1 (SE(2)) or 0, 0, 0, 1 (SE(3)).
-        return False
-    orthogonal = matrix[:2, :2] if (matrix.shape[0] == 3) else matrix[:3, :3]
-    if not (isOrthogonal(orthogonal, epsilon)):
-        return False
-    return True
+# def check_SEn(matrix: m, float: epsilon=0.01) -> bool:  
+#     matrix = np.array(matrix)
+#     bottomRow = matrix[-1]
+#     orthogonalSE2 = np.array([0, 0, 1])
+#     orthogonalSE3 = np.array([0, 0, 0, 1])
+#     if not((bottomRow == orthogonalSE2) or (bottomRow == orthogonalSE3)): #checks if the bottom row is of form 0, 0, 1 (SE(2)) or 0, 0, 0, 1 (SE(3)).
+#         return False
+#     orthogonal = matrix[:2, :2] if (matrix.shape[0] == 3) else matrix[:3, :3]
+#     if not (isOrthogonal(orthogonal, epsilon)):
+#         return False
+#     return True
     
 def main():
   # don't think we need main?
     matrix1 = np.array([[1, 0], [0, 1]])
-    if (isIdentity(matrix1)):
+    if (isIdentity(matrix1, 0.01)):
         print("matrix is identity")
-        
+    matrixSOn = np.array([[0, -1, 0], 
+                          [1, 0, 0], 
+                          [ 0, 0, 1]])
+    if (check_SOn(matrixSOn)):
+        print("matrix is SO(n)")
+                
 if __name__=="__main__":
     main()
