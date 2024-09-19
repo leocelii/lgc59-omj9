@@ -89,13 +89,14 @@ def check_SEn(matrix, epsilon=0.01) -> bool:
     orthogonalSE3 = np.array([0, 0, 0, 1])
     if not((bottomRow == orthogonalSE2) or (bottomRow == orthogonalSE3)): #checks if the bottom row is of form 0, 0, 1 (SE(2)) or 0, 0, 0, 1 (SE(3)).
         return False
-    orthogonal = matrix[:2, :2] if (matrix.shape[0] == 3) else matrix[:3, :3]
+    orthogonal = matrix[:2, :2] if (matrix.shape[0] == 3) else matrix[:3, :3] # the variable orthogonal will be assigned to either the top left 2x2 matrix of SE(2) matrix, or top left 3x3 matrix of SE(3) matrix.
     if not (isOrthogonal(orthogonal, epsilon)):
         return False
     return True
     
 def main():
   # don't think we need main?
+  # just using for testing  
     matrix1 = np.array([[1, 0], [0, 1]])
     if (isIdentity(matrix1, 0.01)):
         print("matrix is identity")
