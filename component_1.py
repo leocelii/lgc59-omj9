@@ -160,7 +160,7 @@ def interpolate_rigid_body(start_pose, goal_pose) -> np.ndarray:
     initialX, initialY, initialTheta = start_pose
     finalX, finalY, finalTheta = goal_pose
     
-    #create 5 interpolation steps from start to goal position
+    #create 5 linear interpolation steps from start to goal position
     pathX = np.linspace(initialX, initialY, 5)
     pathY = np.linspace(finalX, finalY, 5)
     pathTheta = np.linspace(initialTheta, finalTheta, 5)
@@ -182,8 +182,12 @@ def forward_propagate_rigid_body(vector, plan) -> np.ndarray:
         
         finalX = currentX + deltaX
         finalY = currentY + deltaY
-        finalTheta = (currentRot + deltaTheta) % (2*np.pi) # make sure in between [0, 2pi]
-        
+        finalTheta = currentRot + deltaTheta
+        finalTheta = finalTheta % (2*np.pi)
+	
+        if finalTheta < 0:
+            finalTheta += 2*np.pi		 # make sure in between [0, 2pi]
+
         finalPath.append(np.array([finalX, finalY, finalTheta]))
     return np.array(finalPath)
     
