@@ -152,8 +152,8 @@ def random_rotation_matrix(naive: bool) -> np.ndarray:
 
         return R
 
-    #Rigid body in motion
-    def interpolate_rigid_body(start_pose, goal_pose) -> np.ndarray:
+#Rigid body in motion
+def interpolate_rigid_body(start_pose, goal_pose) -> np.ndarray:
     grid = createPlanarEnv(20, 20)
     
     
@@ -168,6 +168,24 @@ def random_rotation_matrix(naive: bool) -> np.ndarray:
     interpolationSteps = np.stack((pathX, pathY, pathTheta), axis=-1)
     
     return interpolationSteps
+
+def forward_propagate_rigid_body(vector, plan) -> np.ndarray:
+    
+    finalPath = [np.array(vector)] # add initial velocity vector as first state of path
+    for planVector, duration in plan:
+        vX, vY, rotation = planVector
+        currentX, currentY, currentRot = finalPath[-1] 
+        
+        deltaX = (vX * duration * np.cos(currentRot)) - (vY * duration * np.sin(currentRot))
+        deltaY = (vX * duration * np.sin(currentRot)) + (vY * duration * np.cos(currentRot))
+        deltaTheta = rotation * duration
+        
+        finalX = currentX + deltaX
+        finalY = currentY + deltaY
+        finalTheta = (currentRot + deltaTheta) % (2*np.pi) # make sure in between [0, 2pi]
+        
+        finalPath.append(np.array([finalX, finalY, finalTheta]))
+    return np.array(finalPath)
     
 def main():
   # don't think we need main?
@@ -189,8 +207,16 @@ def main():
                           [0, 0, 0, 1]])
     if (check_SEn(matrixSEn)):
         print("matrix is SEn")
-
         
+    vector1 = np.array([1.0, .5, np.pi/4])
+    plan = [
+    ([2.0, 0.0, 0.0], 2),        
+    ([0.0, 0.0, np.pi / 6], 1),  
+    ([1.0, 1.0, 0.0], 3),        
+    ([0.5, 0.0, 0.0], 2)
+    ]
+    path = forward_propagate_rigid_body(vector1, plan)       
+    print(path)
 
 if __name__=="__main__":
     main()
