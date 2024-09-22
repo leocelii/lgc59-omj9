@@ -25,6 +25,12 @@ def isOrthogonal(matrix, epsilon):
     productMatrix = np.dot(matrix, transpose)
     return isIdentity(productMatrix, epsilon)
 
+def createPlanarEnv(x, y):
+    xvals = np.linspace(-(x/2), x/2, x)
+    yvals = np.linspace(-(y/2), y/2, y)
+    planarEnv = np.meshgrid(xvals, yvals)
+    return planarEnv
+    
  ## Steps for check_SOn implementation:
     ## Is matrix orthongal && is determinant of matrix = 1? (both true == m ∊ SO(n))
     ##    - is matrix orthongal? 
@@ -145,6 +151,23 @@ def random_rotation_matrix(naive: bool) -> np.ndarray:
         ])
 
         return R
+
+    #Rigid body in motion
+    def interpolate_rigid_body(start_pose, goal_pose) -> np.ndarray:
+    grid = createPlanarEnv(20, 20)
+    
+    
+    initialX, initialY, initialTheta = start_pose
+    finalX, finalY, finalTheta = goal_pose
+    
+    #create 5 interpolation steps from start to goal position
+    pathX = np.linspace(initialX, initialY, 5)
+    pathY = np.linspace(finalX, finalY, 5)
+    pathTheta = np.linspace(initialTheta, finalTheta, 5)
+    
+    interpolationSteps = np.stack((pathX, pathY, pathTheta), axis=-1)
+    
+    return interpolationSteps
     
 def main():
   # don't think we need main?
