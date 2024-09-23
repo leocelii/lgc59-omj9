@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+from matplotlib.animation import FuncAnimation
 
 ##Validating Rotations
 # compares given matrix against the identity matrix within a tolerance denoted by epsilon parameter
@@ -144,6 +145,7 @@ def random_rotation_matrix(naive: bool) -> np.ndarray:
         q3 = np.sqrt(u1) * np.sin(2 * np.pi * u3)
         q4 = np.sqrt(u1) * np.cos(2 * np.pi * u3)
         #Convert the quaternion to a 3x3 rotation matrix
+            #I pray this is correct lol
         R = np.array([
             [1 - 2 * (q3**2 + q4**2), 2 * (q2 * q3 - q4 * q1), 2 * (q2 * q4 + q3 * q1)],
             [2 * (q2 * q3 + q4 * q1), 1 - 2 * (q2**2 + q4**2), 2 * (q3 * q4 - q2 * q1)],
@@ -191,43 +193,185 @@ def forward_propagate_rigid_body(vector, plan) -> np.ndarray:
         finalPath.append(np.array([finalX, finalY, finalTheta]))
     return np.array(finalPath)
 
+# def visualize_path(path):
+#     robotLength = 0.5
+#     robotWidth = 0.3
+        
+#     fig, ax = plt.subplots()
+        
+#     ax.set_xlim([-10, 10])
+#     ax.set_ylim([-10, 10])
+     
+#     xVals = []
+#     yVals = []   
+#     robotCorners = np.array([
+#         [-(robotLength / 2), -(robotWidth / 2)],
+#         [(robotLength / 2), -(robotWidth / 2)],
+#         [(robotLength / 2), (robotWidth / 2)],
+#         [-(robotLength / 2), (robotWidth / 2)],
+#     ])    
+#     for pose in path:
+#         vX, vY, theta = pose
+#         ax.plot(vX, vY)
+    
+#         xVals.append(vX)
+#         yVals.append(vY)    
+#         rotation = np.array([
+#             [np.cos(theta), -np.sin(theta)],
+#             [np.sin(theta), np.cos(theta)],    
+#         ])
+#         rotationTranspose = findTranspose(rotation, rotation.shape[0])
+#         rotatedRobotObject = np.dot(robotCorners, rotationTranspose)  
+#         robotFinalPosition = rotatedRobotObject + np.array([vX, vY])
+        
+#         finalRobotObject = plt.Polygon(robotFinalPosition)
+#         ax.add_patch(finalRobotObject)
+    
+#     ax.plot(xVals, yVals, '-o')    
+#     plt.grid(True)
+#     plt.show()
 def visualize_path(path):
     robotLength = 0.5
     robotWidth = 0.3
-        
-    fig, ax = plt.subplots()
-        
-    ax.set_xlim([-10, 10])
-    ax.set_ylim([-10, 10])
-     
-    xVals = []
-    yVals = []   
+    # Robot corner points relative to the robot's center
     robotCorners = np.array([
         [-(robotLength / 2), -(robotWidth / 2)],
         [(robotLength / 2), -(robotWidth / 2)],
         [(robotLength / 2), (robotWidth / 2)],
         [-(robotLength / 2), (robotWidth / 2)],
-    ])    
-    for pose in path:
-        vX, vY, theta = pose
-        ax.plot(vX, vY)
-    
-        xVals.append(vX)
-        yVals.append(vY)    
+    ])
+
+    # Extract x, y positions for plotting the path
+    xVals = [pose[0] for pose in path]
+    yVals = [pose[1] for pose in path]
+
+    # Setup 
+    fig, ax = plt.subplots()
+    ax.set_xlim([-10, 10])
+    ax.set_ylim([-10, 10])
+    ax.set_title('Robot Path Animation')
+    ax.set_xlabel('X Position')
+    ax.set_ylabel('Y Position')
+    ax.grid(True)
+
+    ax.plot(xVals, yVals, 'k--', label='Path')
+
+    #robot polygon
+    robotPatch = plt.Polygon(robotCorners, closed=True, fc='blue', ec='black')
+    ax.add_patch(robotPatch)
+
+    #updates the robot's position and orientation per frame
+    def update(frame):
+        vX, vY, theta = path[frame]
+        # Compute rotation matrix
         rotation = np.array([
             [np.cos(theta), -np.sin(theta)],
-            [np.sin(theta), np.cos(theta)],    
+            [np.sin(theta),  np.cos(theta)],
         ])
-        rotationTranspose = findTranspose(rotation, rotation.shape[0])
-        rotatedRobotObject = np.dot(robotCorners, rotationTranspose)  
-        robotFinalPosition = rotatedRobotObject + np.array([vX, vY])
-        
-        finalRobotObject = plt.Polygon(robotFinalPosition)
-        ax.add_patch(finalRobotObject)
-    
-    ax.plot(xVals, yVals, '-o')    
-    plt.grid(True)
+        rotatedCorners = robotCorners @ rotation.T
+        robotPosition = rotatedCorners + np.array([vX, vY])
+        robotPatch.set_xy(robotPosition)
+
+        return robotPatch,
+
+    ani = FuncAnimation(fig, update, frames=len(path), blit=True, interval=500, repeat=False)
+    plt.legend()
     plt.show()
+
+
+def interpolate_arm(start, goal, steps=10):
+    thetaStart0, thetaStart1 = start
+    thetaGoal0, thetaGoal1 = goal
+    N = steps
+    path = []
+    delta0 = thetaGoal0 - thetaStart0
+    delta1 = thetaGoal1 - thetaStart1
+
+    for k in range(N + 1):
+        t = k / N
+        theta0 = thetaStart0 + t * delta0
+        theta1 = thetaStart1 + t * delta1
+        path.append((theta0, theta1))
+
+    return path
+
+def forward_propagate_arm(start_pose, Plan):
+    thetaCurrent0, thetaCurrent1 = start_pose  # Initialize current joint angles
+    path = [start_pose]  # Initialize path with the starting configuration
+
+    for command in Plan:
+        w0, w1, dT = command  #extract angular velocities and duration
+
+        #compute change in joint angles
+        deltaTheta0 = w0 * dT
+        deltaTheta1 = w1 * dT
+        #update joint angles
+        thetaNew0 = thetaCurrent0 + deltaTheta0
+        thetaNew1 = thetaCurrent1 + deltaTheta1
+        current_pose = (thetaNew0, thetaNew1)
+        path.append(current_pose)
+
+        thetaCurrent0 = thetaNew0
+        thetaCurrent1 = thetaNew1
+
+    return path
+
+
+def visualize_arm_path(path):
+    L1 = 2.0  
+    L2 = 1.5  
+    positions = []  #((x0, y0), (x1, y1), (x2, y2))
+    # for each configuration in the path
+    for t0, t1 in path:
+        #Base
+        x0, y0 = 0.0, 0.0
+        # Position of Joint 1 (end of Link 1)
+        x1 = x0 + L1 * np.cos(t0)
+        y1 = y0 + L1 * np.sin(t0)
+        #end of Link 2
+        x2 = x1 + L2 * np.cos(t0 + t1)
+        y2 = y1 + L2 * np.sin(t0 + t1)
+        positions.append(((x0, y0), (x1, y1), (x2, y2)))
+
+    # Set up the figure and axes
+    fig, ax = plt.subplots()
+    ax.set_aspect('equal')
+    ax.set_xlim(-10, 10)
+    ax.set_ylim(-10, 10)
+    ax.set_title('Robotic Arm Movement')
+    ax.set_xlabel('X Position (meters)')
+    ax.set_ylabel('Y Position (meters)')
+
+    # Initialize plot elements (lines for links)
+    link1_line, = ax.plot([], [], 'o-', lw=4, color='blue', label='Link 1')
+    link2_line, = ax.plot([], [], 'o-', lw=4, color='green', label='Link 2')
+
+    #plotting the path of the end-effector
+    end_effector_path, = ax.plot([], [], 'r--', lw=1, label='End-Effector Path')
+    end_effector_positions = []
+    ax.legend()
+
+    # Function to update the plot for each frame
+    def update_frame(i):
+        ((x0, y0), (x1, y1), (x2, y2)) = positions[i]
+
+        # Update Link 1
+        link1_line.set_data([x0, x1], [y0, y1])
+
+        #Link 2
+        link2_line.set_data([x1, x2], [y1, y2])
+        # Update end-effector path
+        end_effector_positions.append((x2, y2))
+        xs, ys = zip(*end_effector_positions)
+        end_effector_path.set_data(xs, ys)
+
+        return link1_line, link2_line, end_effector_path
+
+    ani = FuncAnimation(fig, update_frame, frames=len(positions),
+                        interval=50, blit=True, repeat=False)
+    plt.show()
+
+
 
 def main():
   # don't think we need main?
@@ -267,7 +411,22 @@ def main():
     (1.7071, 7.0027, np.pi / 3),
     (1.9659, 7.9686, np.pi / 3)
     ]
+    #works yippee!
     visualize_path(path2)
+    # -----------------------------------------------
+    #armpath test... used gpt to generate this and verify it. Should probably verify by hand but now I'm too tired
+    start_configuration = (np.radians(30), np.radians(45))  # (t0_start, t1_start)
+    goal_configuration = (np.radians(90), np.radians(0))    # (t0_goal, t1_goal)
+    arm_path = interpolate_arm(start_configuration, goal_configuration, steps=10)
+    print(arm_path)
+    # -----------------------------------------------
+    start_configuration = (np.deg2rad(45), np.deg2rad(30))
+    goal_configuration = (np.deg2rad(90), np.deg2rad(-45))
+    path = interpolate_arm(start_configuration, goal_configuration, steps=50)
+    visualize_arm_path(path)
+
+
+
 
 if __name__=="__main__":
     main()
