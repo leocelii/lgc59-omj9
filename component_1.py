@@ -1,6 +1,6 @@
 import numpy as np
-import matplotlib
-import math
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 
 ##Validating Rotations
 # compares given matrix against the identity matrix within a tolerance denoted by epsilon parameter
@@ -190,7 +190,45 @@ def forward_propagate_rigid_body(vector, plan) -> np.ndarray:
 
         finalPath.append(np.array([finalX, finalY, finalTheta]))
     return np.array(finalPath)
+
+def visualize_path(path):
+    robotLength = 0.5
+    robotWidth = 0.3
+        
+    fig, ax = plt.subplots()
+        
+    ax.set_xlim([-10, 10])
+    ax.set_ylim([-10, 10])
+     
+    xVals = []
+    yVals = []   
+    robotCorners = np.array([
+        [-(robotLength / 2), -(robotWidth / 2)],
+        [(robotLength / 2), -(robotWidth / 2)],
+        [(robotLength / 2), (robotWidth / 2)],
+        [-(robotLength / 2), (robotWidth / 2)],
+    ])    
+    for pose in path:
+        vX, vY, theta = pose
+        ax.plot(vX, vY)
     
+        xVals.append(vX)
+        yVals.append(vY)    
+        rotation = np.array([
+            [np.cos(theta), -np.sin(theta)],
+            [np.sin(theta), np.cos(theta)],    
+        ])
+        rotationTranspose = findTranspose(rotation, rotation.shape[0])
+        rotatedRobotObject = np.dot(robotCorners, rotationTranspose)  
+        robotFinalPosition = rotatedRobotObject + np.array([vX, vY])
+        
+        finalRobotObject = plt.Polygon(robotFinalPosition)
+        ax.add_patch(finalRobotObject)
+    
+    ax.plot(xVals, yVals, '-o')    
+    plt.grid(True)
+    plt.show()
+
 def main():
   # don't think we need main?
   # just using for testing  
@@ -221,6 +259,15 @@ def main():
     ]
     path = forward_propagate_rigid_body(vector1, plan)       
     print(path)
+
+    path2 = [
+    (1.0, 0.5, np.pi / 4),
+    (3.8284, 3.3284, np.pi / 4),
+    (3.8284, 3.3284, np.pi / 3),
+    (1.7071, 7.0027, np.pi / 3),
+    (1.9659, 7.9686, np.pi / 3)
+    ]
+    visualize_path(path2)
 
 if __name__=="__main__":
     main()
