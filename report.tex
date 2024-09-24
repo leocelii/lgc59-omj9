@@ -45,9 +45,14 @@ When \texttt{naive} is True, it generates random Euler angles (roll, pitch, yaw)
 \subsubsection*{Part 3: Rigid body in motion}
 
 \begin{itemize}
-    \item \texttt{interpolate\_rigid\_body()}
-    \item \texttt{forward\_propagate\_rigid\_body()}
-    \item \texttt{visualize\_path()}
+    \item \texttt{interpolate\_rigid\_body()}: This function will generate a path, or a sequence of positions, that starts at some given original positon and will end at some given final position. The input vectors are elements of SE(2), so we first extract all 3 elements from each of the velocity vectors. Our implementation was to create a sequence of positions, through linear interpolation. So the change in vX, vY, and theta (the rotation), after every iteration or step, will be the same. We used np.linspace() to create 5 steps or iterations between the start position and end positon. The iterations will therefore be evenly spaced, and will reflect a linear interpolation approach. We apply this method for the x values, y values, and theta values. After creating arrays of evenly spaced values from the start value to the end value, for x, y and theta individually, we use np.stack to create the 2d array of poses and "stack" all the arrays atop one another. This 2d array is what is returned. 
+    \item \texttt{forward\_propagate\_rigid\_body()}: This function generates a path, that starts at some inital position, denoted by the first parameter which is a vector. The second parameter is a plan, which consists of a sequence of N tuples (velocity vectors, duration) that are each individually and consecutively applied to the start position, creating a path towards some end position. Our implementation firsly consists of extracting each plan vector, and one by one, applying it to the current position, which for the very first iteration is represented by the first parameter  vector. To apply each vector, we need to determine the change in each vector element (x, y, theta). To calculate x, y, and theta we used these specific formulas: 
+    1. \[ x_t+1 = x_t + v_x * Δt * cos(θ_t)\]
+    2. \[ y_t+1 = y_t + v_x * Δt * sin(θ_t)\]
+    3. \[θ_t+1 = θ_t + ω + Δt\]
+Once the resultant positions and rotations are calculated, we check to make sure that the rotation is witin [0, 2pi], and then append the resulting position to some final list. 
+After every plan vector has been applied, we return the final list. 
+    \item \texttt{visualize\_path()}: This function will return a visualization and animation, using matplotlib.patches and matplotlib.animation, of some path that a rigid body (robot) takes in some preset environment. First, we create the dimensions of our robot. We then create an array of the corners of the rectangular robot, using its dimensions. This is used for visualization of the robot object on the graph/animation. We then set the bounds for the graph/environment, [-10, 10], and then create the actual polygon to be displayed on the graph, representing the robot itself. To do this we used plt.Polygon, and passed in the robotCorners array to specify it's initial position. Then we needed to animate the polygons movement. We used funcAnimation to generate data, updating the data for every frame of the animation. We update the orientation of the robot by calculating the rotation matrix and applying it to the polygon's corners, and then updating the position of the corners. Using plt.show(), we display our animation and path. 
 \end{itemize}
 
 \subsubsection*{Part 4: Movement of an Arm}
