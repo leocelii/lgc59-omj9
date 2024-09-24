@@ -121,20 +121,20 @@ def random_rotation_matrix(naive: bool) -> np.ndarray:
             [0, np.sin(roll), np.cos(roll)]
         ])
         
-        # Rotation matrix for pitch (y)
+        #rotation matrix for pitch (y)
         R_y = np.array([
             [np.cos(pitch), 0, np.sin(pitch)],
             [0, 1, 0],
             [-np.sin(pitch), 0, np.cos(pitch)]
         ])
-        
-        # Rotation matrix for yaw (z)
+
+        #rotation matrix for yaw (z)
         R_z = np.array([
             [np.cos(yaw), -np.sin(yaw), 0],
             [np.sin(yaw), np.cos(yaw), 0],
             [0, 0, 1]
         ])
-        # Step 3: Combine the rotation matrices. The order of multiplication matters (R = R_z * R_y * R_x)
+        # then Combine the rotation matrices. The order of multiplication matters (R = R_z * R_y * R_x)
         R = R_z @ R_y @ R_x
         return R
     else:
@@ -274,7 +274,7 @@ def visualize_path(path):
 
         return robotPatch,
 
-    ani = FuncAnimation(fig, update, frames=len(path), blit=True, interval=500, repeat=False)
+    ani = FuncAnimation(fig, update, frames=len(path), blit=True, interval=500, repeat=True)
     plt.legend()
     plt.show()
 
@@ -296,8 +296,8 @@ def interpolate_arm(start, goal, steps=10):
     return path
 
 def forward_propagate_arm(start_pose, Plan):
-    thetaCurrent0, thetaCurrent1 = start_pose  # Initialize current joint angles
-    path = [start_pose]  # Initialize path with the starting configuration
+    thetaCurrent0, thetaCurrent1 = start_pose  #initialize current joint angles
+    path = [start_pose]  #initialize path with the starting configuration
 
     for command in Plan:
         w0, w1, dT = command  #extract angular velocities and duration
@@ -368,7 +368,7 @@ def visualize_arm_path(path):
         return link1_line, link2_line, end_effector_path
 
     ani = FuncAnimation(fig, update_frame, frames=len(positions),
-                        interval=50, blit=True, repeat=False)
+                        interval=50, blit=True, repeat=True)
     plt.show()
 
 
@@ -414,7 +414,7 @@ def main():
     #works yippee!
     visualize_path(path2)
     # -----------------------------------------------
-    #armpath test... used gpt to generate this and verify it. Should probably verify by hand but now I'm too tired
+    #armpath test... used gpt to generate some test cases and verify it.
     start_configuration = (np.radians(30), np.radians(45))  # (t0_start, t1_start)
     goal_configuration = (np.radians(90), np.radians(0))    # (t0_goal, t1_goal)
     arm_path = interpolate_arm(start_configuration, goal_configuration, steps=10)

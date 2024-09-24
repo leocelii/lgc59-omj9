@@ -1,0 +1,61 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\title{Assignment 1 Report}
+\author{Leonardo Celi \& Oways Jaffer \\ lgc59-omj9}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Project details}
+
+\noindent \textbf{Language:} Python \\
+\textbf{Libraries used:} Numpy, matplotlib, matplotlib.pyplot, patches, animation.
+
+\subsection*{Files}
+\begin{itemize}
+    \item \texttt{Component\_2.gif}: Visualize\_path animation for paths from other 2 methods in part 3.
+    \item \texttt{Component\_3.gif}: Visualize\_arm\_path animation for paths from other 2 methods in part 4.
+\end{itemize}
+
+\section*{Implementation Specifications}
+
+\subsection*{Component\_1.py}
+
+\subsubsection*{Part 1: Validating Rotations}
+
+\begin{itemize}
+    \item \texttt{check\_SOn()}
+    \item \texttt{check\_quaternion()}
+    \item \texttt{check\_SEn()}
+\end{itemize}
+
+\subsubsection*{Part 2: Uniform Random Rotations}
+
+\begin{itemize}
+    \item \texttt{random\_rotation\_matrix()}
+    \item \texttt{random\_quaternion()}
+\end{itemize}
+
+When \texttt{naive} is True, it generates random Euler angles (roll, pitch, yaw) from \([0, 2\pi)\). It then computes the rotation matrices \(R_x\), \(R_y\), and \(R_z\) for rotations around the x, y, and z axes and multiplies them in the order \(R = R_z \cdot R_y \cdot R_x\) to get the final rotation matrix. When \texttt{naive} is False it generates random numbers \(u_1\), \(u_2\), \(u_3\) from \([0, 1)\) to create a random unit quaternion \((q_1, q_2, q_3, q_4)\). It converts this quaternion to a rotation matrix \(R\) using the standard quaternion-to-matrix conversion formula.
+
+\subsubsection*{Part 3: Rigid body in motion}
+
+\begin{itemize}
+    \item \texttt{interpolate\_rigid\_body()}
+    \item \texttt{forward\_propagate\_rigid\_body()}
+    \item \texttt{visualize\_path()}
+\end{itemize}
+
+\subsubsection*{Part 4: Movement of an Arm}
+
+\begin{itemize}
+    \item \texttt{interpolate\_arm()}: generates a path by linearly interpolating between the start and goal joint angles over a fixed number of steps. We compute the differences in joint angles once and incrementally add scaled versions of these differences to the starting angles.
+    \item \texttt{forward\_propagate\_arm()}: simulates the arm's motion by applying angular velocities over specified durations to the starting joint angles. We calculate the change in each joint angle by multiplying the angular velocity by the duration, update the current angles, and append each new pose to the path for continuous tracking.
+    \item \texttt{visualize\_arm\_path()}: computes the positions of the arm's joints and end-effector for each configuration using forward kinematics. We calculate the (x, y) positions of each joint based on the current joint angles and link lengths then store these positions for an accurate visualization.
+\end{itemize}
+
+\end{document}
