@@ -25,12 +25,6 @@ def isOrthogonal(matrix, epsilon):
     transpose = findTranspose(matrix, matrix.shape[0])
     productMatrix = np.dot(matrix, transpose)
     return isIdentity(productMatrix, epsilon)
-
-def createPlanarEnv(x, y):
-    xvals = np.linspace(-(x/2), x/2, x)
-    yvals = np.linspace(-(y/2), y/2, y)
-    planarEnv = np.meshgrid(xvals, yvals)
-    return planarEnv
     
  ## Steps for check_SOn implementation:
     ## Is matrix orthongal && is determinant of matrix = 1? (both true == m ∊ SO(n))
@@ -45,7 +39,6 @@ def createPlanarEnv(x, y):
 def check_SOn(matrix, epsilon=0.01) -> bool:
     # Finding transpose and multiplying with original and check if resultant matrix is identity
     matrix = np.array(matrix)
-    print(matrix)
     transpose = findTranspose(matrix, matrix.shape[0])
     productMatrix = np.dot(matrix, transpose)
     if not (isIdentity(productMatrix, epsilon)):
@@ -156,8 +149,6 @@ def random_rotation_matrix(naive: bool) -> np.ndarray:
 
 #Rigid body in motion
 def interpolate_rigid_body(start_pose, goal_pose) -> np.ndarray:
-    grid = createPlanarEnv(20, 20)
-    
     
     initialX, initialY, initialTheta = start_pose
     finalX, finalY, finalTheta = goal_pose
@@ -193,43 +184,6 @@ def forward_propagate_rigid_body(vector, plan) -> np.ndarray:
         finalPath.append(np.array([finalX, finalY, finalTheta]))
     return np.array(finalPath)
 
-# def visualize_path(path):
-#     robotLength = 0.5
-#     robotWidth = 0.3
-        
-#     fig, ax = plt.subplots()
-        
-#     ax.set_xlim([-10, 10])
-#     ax.set_ylim([-10, 10])
-     
-#     xVals = []
-#     yVals = []   
-#     robotCorners = np.array([
-#         [-(robotLength / 2), -(robotWidth / 2)],
-#         [(robotLength / 2), -(robotWidth / 2)],
-#         [(robotLength / 2), (robotWidth / 2)],
-#         [-(robotLength / 2), (robotWidth / 2)],
-#     ])    
-#     for pose in path:
-#         vX, vY, theta = pose
-#         ax.plot(vX, vY)
-    
-#         xVals.append(vX)
-#         yVals.append(vY)    
-#         rotation = np.array([
-#             [np.cos(theta), -np.sin(theta)],
-#             [np.sin(theta), np.cos(theta)],    
-#         ])
-#         rotationTranspose = findTranspose(rotation, rotation.shape[0])
-#         rotatedRobotObject = np.dot(robotCorners, rotationTranspose)  
-#         robotFinalPosition = rotatedRobotObject + np.array([vX, vY])
-        
-#         finalRobotObject = plt.Polygon(robotFinalPosition)
-#         ax.add_patch(finalRobotObject)
-    
-#     ax.plot(xVals, yVals, '-o')    
-#     plt.grid(True)
-#     plt.show()
 def visualize_path(path):
     robotLength = 0.5
     robotWidth = 0.3
@@ -374,36 +328,7 @@ def visualize_arm_path(path):
 
 
 def main():
-  # don't think we need main?
-  # just using for testing  
-    matrix1 = np.array([[1, 0], [0, 1]])
-    if (isIdentity(matrix1, 0.01)):
-        print("matrix is identity")
-    matrixSOn = np.array([[0, -1, 0], 
-                          [1, 0, 0], 
-                          [ 0, 0, 1]])
-    if (check_SOn(matrixSOn)):
-        print("matrix is SO(n)")
-    matrixQ = np.array([.5, .5, .5, .5])
-    if (check_quaternion(matrixQ)):
-        print("matrix is quat")
-    matrixSEn = np.array([[1, 0, 0, 2],
-                          [0, 1, 0, 3],
-                          [0, 0, 1, 4],
-                          [0, 0, 0, 1]])
-    if (check_SEn(matrixSEn)):
-        print("matrix is SEn")
-        
-    vector1 = np.array([1.0, .5, np.pi/4])
-    plan = [
-    ([2.0, 0.0, 0.0], 2),        
-    ([0.0, 0.0, np.pi / 6], 1),  
-    ([1.0, 1.0, 0.0], 3),        
-    ([0.5, 0.0, 0.0], 2)
-    ]
-    path = forward_propagate_rigid_body(vector1, plan)       
-    print(path)
-
+	
     path2 = [
     (1.0, 0.5, np.pi / 4),
     (3.8284, 3.3284, np.pi / 4),
@@ -414,7 +339,7 @@ def main():
     #works yippee!
     visualize_path(path2)
     # -----------------------------------------------
-    #armpath test... used gpt to generate some test cases and verify it.
+    #armpath test
     start_configuration = (np.radians(30), np.radians(45))  # (t0_start, t1_start)
     goal_configuration = (np.radians(90), np.radians(0))    # (t0_goal, t1_goal)
     arm_path = interpolate_arm(start_configuration, goal_configuration, steps=10)
