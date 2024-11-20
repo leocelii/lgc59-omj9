@@ -41,8 +41,8 @@ matplotlib libraries are already installed.
 Setup python environment
 user: ~ $ source /common/system/venv/python310/bin/activate
 (python310) user: ~ $ python
->>> import numpy
->>> import matplotlib
+import numpy
+import matplotlib
 For the factor graph component, use the conda environment (see the corresponding section).
 It should be possible for the TAs to check whether your software returns a correct result for the
 implemented functions. Be sure to use the function signature given.
