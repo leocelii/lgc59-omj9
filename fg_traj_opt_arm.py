@@ -10,20 +10,20 @@ def wrap_angles(angle):
     return (angle + np.pi) % (2 * np.pi) - np.pi
 
 def main():
-    # Parse command-line arguments
+
     parser = argparse.ArgumentParser(description='Trajectory Optimization for a 2-Link Robot Arm')
     parser.add_argument('--start', nargs=2, type=float, default=[0.0, 0.0], help='Start joint angles (theta0 theta1)')
     parser.add_argument('--goal', nargs=2, type=float, default=[np.pi, np.pi/2], help='Goal joint angles (theta0 theta1)')
     parser.add_argument('--T', type=int, default=50, help='Number of time steps')
     args = parser.parse_args()
 
-    # Parameters
+    
     dt = 0.1  # Time step
     T = args.T
     start = np.array(args.start)
     goal = np.array(args.goal)
 
-    # Factor Graph Representation
+    
     class FactorGraph:
         def __init__(self, T, start, goal, dt):
             self.T = T
@@ -45,7 +45,7 @@ def main():
                 total_cost += factor(q, u)
             return total_cost
 
-    # Factors
+    
     def dynamics_factor(dt, t):
         """Dynamics factor: Enforces theta_{t+1} = theta_t + u_t * dt."""
         def factor(q, u):
@@ -60,14 +60,14 @@ def main():
         """Start factor: Enforces theta_0 = start."""
         def factor(q, u):
             residual = wrap_angles(q[0] - start)
-            return np.sum(residual**2) * 1e6  # Large weight to enforce equality
+            return np.sum(residual**2) * 1e6  
         return factor
 
     def goal_factor(goal):
         """Goal factor: Enforces theta_T = goal."""
         def factor(q, u):
             residual = wrap_angles(q[-1] - goal)
-            return np.sum(residual**2) * 1e6  # Large weight to enforce equality
+            return np.sum(residual**2) * 1e6  
         return factor
 
     def control_cost_factor(t):
@@ -86,17 +86,17 @@ def main():
             return np.sum(acceleration**2)
         return factor
 
-    # Initialize Factor Graph
+    
     factor_graph = FactorGraph(T, start, goal, dt)
 
-    # Add factors
-    factor_graph.add_factor(start_factor(start))  # Start constraint
-    factor_graph.add_factor(goal_factor(goal))    # Goal constraint
+    
+    factor_graph.add_factor(start_factor(start))  
+    factor_graph.add_factor(goal_factor(goal))    
     for t in range(T):
-        factor_graph.add_factor(control_cost_factor(t))  # Control cost
-        factor_graph.add_factor(dynamics_factor(dt, t))  # Dynamics constraint
+        factor_graph.add_factor(control_cost_factor(t))  
+        factor_graph.add_factor(dynamics_factor(dt, t))  
     for t in range(T - 1):
-        factor_graph.add_factor(acceleration_cost_factor(dt, t))  # Acceleration cost
+        factor_graph.add_factor(acceleration_cost_factor(dt, t))  
 
     # Initial guess: Straight line in angular space
     initial_positions = np.zeros((factor_graph.num_states, 2))
@@ -109,10 +109,10 @@ def main():
     # Wrap controls
     initial_controls = wrap_angles(initial_controls)
 
-    # Flatten initial guess
+    # Flatten 
     initial_variables = np.hstack((initial_positions.flatten(), initial_controls.flatten()))
 
-    # Optimize trajectory
+    
     result = minimize(
         factor_graph.compute_total_cost,
         initial_variables,
@@ -120,11 +120,11 @@ def main():
         options={"disp": True, "maxiter": 1000}
     )
 
-    # Extract optimized positions and controls
+    
     optimized_positions = result.x[:factor_graph.num_states * 2].reshape(factor_graph.num_states, 2)
     optimized_controls = result.x[factor_graph.num_states * 2:].reshape(factor_graph.num_controls, 2)
 
-    # Wrap angles
+    
     optimized_positions = wrap_angles(optimized_positions)
     optimized_controls = wrap_angles(optimized_controls)
 
@@ -137,7 +137,7 @@ def main():
     print("Start matches:", np.allclose(optimized_positions[0], start, atol=1e-2))
     print("Goal matches:", np.allclose(optimized_positions[-1], goal, atol=1e-2))
 
-    # Plot results: Initial vs Optimized Trajectory
+    
     plt.figure()
     plt.plot(initial_positions[:, 0], initial_positions[:, 1], label="Initial Trajectory", linestyle="--")
     plt.plot(optimized_positions[:, 0], optimized_positions[:, 1], label="Optimized Trajectory", color="blue")
@@ -178,8 +178,8 @@ def main():
 #---Animation of the robot arm---
     def forward_kinematics(theta):
         """Compute the (x, y) position of the end effector."""
-        l1 = 1.0  # Length of the first link
-        l2 = 1.0  # Length of the second link
+        l1 = 1.0  #first link
+        l2 = 1.0  # second link
         theta0, theta1 = theta
         x1 = l1 * np.cos(theta0)
         y1 = l1 * np.sin(theta0)
@@ -208,7 +208,7 @@ def main():
 
 
 
-    # Factor Graph Visualization
+    
     def visualize_factor_graph(T):
         G = nx.Graph()
         # Add nodes for states and controls
@@ -216,28 +216,28 @@ def main():
             G.add_node(f"theta_{t}")
         for t in range(T):
             G.add_node(f"u_{t}")
-        # Add edges for dynamics factors
+        # dynamics
         for t in range(T):
             G.add_edge(f"theta_{t}", f"theta_{t+1}", label="dynamics")
             G.add_edge(f"theta_{t}", f"u_{t}", label="dynamics")
-        # Add control cost factors
+       
         for t in range(T):
             G.add_edge(f"u_{t}", f"u_{t}", label="control cost")
-        # Add acceleration cost factors
+       
         for t in range(T - 1):
             G.add_edge(f"u_{t}", f"u_{t+1}", label="acceleration cost")
-        # Add start and goal edges
+        
         G.add_edge("start", "theta_0", label="start")
         G.add_edge(f"theta_{T}", "goal", label="goal")
 
-        # Draw graph
+       
         pos = nx.spring_layout(G, seed=42)
         nx.draw(G, pos, with_labels=True, node_size=500, font_size=8)
         nx.draw_networkx_edge_labels(G, pos, edge_labels=nx.get_edge_attributes(G, "label"))
         plt.title("Factor Graph Representation for Robot Arm")
         plt.show()
 
-    # Visualize the factor graph
+    
     visualize_factor_graph(T=min(5, T))
 
 if __name__ == "__main__":

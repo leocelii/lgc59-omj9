@@ -91,18 +91,18 @@ def main():
     # Initialize 
     factor_graph = FactorGraph(T, start, goal, dt)
 
-    # Add factors
-    factor_graph.add_factor(start_factor(start))  # Start constraint
-    factor_graph.add_factor(goal_factor(goal))    # Goal constraint
-    factor_graph.add_factor(intermediate_factor(x0_in, T // 3))    # First intermediate state
-    factor_graph.add_factor(intermediate_factor(x1_in, 2 * T // 3))  # Second intermediate state
+    
+    factor_graph.add_factor(start_factor(start))  
+    factor_graph.add_factor(goal_factor(goal))   
+    factor_graph.add_factor(intermediate_factor(x0_in, T // 3))    
+    factor_graph.add_factor(intermediate_factor(x1_in, 2 * T // 3))  
 
     for t in range(T):
-        factor_graph.add_factor(control_cost_factor(t))  # Control cost
-        factor_graph.add_factor(dynamics_factor(dt, t))  # Dynamics constraint
+        factor_graph.add_factor(control_cost_factor(t))  
+        factor_graph.add_factor(dynamics_factor(dt, t))  
 
     for t in range(T - 1):
-        factor_graph.add_factor(acceleration_cost_factor(dt, t))  # Acceleration cost
+        factor_graph.add_factor(acceleration_cost_factor(dt, t))  
 
     # Initial guess: Straight line with intermediate points
     waypoints = [start, x0_in, x1_in, goal]
@@ -117,10 +117,10 @@ def main():
     # Initial guess for controls
     initial_controls = np.diff(initial_positions, axis=0) / dt
 
-    # Flatten initial guess
+    # Flatten
     initial_variables = np.hstack((initial_positions.flatten(), initial_controls.flatten()))
 
-    # Optimize trajectory
+    # Optimize 
     result = minimize(
         factor_graph.compute_total_cost,
         initial_variables,
@@ -128,11 +128,11 @@ def main():
         options={"disp": True, "maxiter": 2000, "ftol": 1e-6}
     )
 
-    # Extract optimized positions and controls
+    
     optimized_positions = result.x[:factor_graph.num_states * 2].reshape(factor_graph.num_states, 2)
     optimized_controls = result.x[factor_graph.num_states * 2:].reshape(factor_graph.num_controls, 2)
 
-    # Plot results
+    
     plt.figure()
     plt.plot(initial_positions[:, 0], initial_positions[:, 1], label="Initial Trajectory")
     plt.plot(optimized_positions[:, 0], optimized_positions[:, 1], label="Optimized Trajectory", color="orange")
@@ -184,17 +184,17 @@ def main():
             G.add_node(f"q_{t}")
         for t in range(T):
             G.add_node(f"u_{t}")
-        # Add edges for dynamics factors
+        # dynamics factors
         for t in range(T):
             G.add_edge(f"q_{t}", f"q_{t+1}", label="dynamics")
             G.add_edge(f"q_{t}", f"u_{t}", label="dynamics")
-        # Add edges for control cost factors
+        # control cost factors
         for t in range(T):
             G.add_edge(f"u_{t}", f"u_{t}", label="control cost")
-        # Add edges for acceleration cost factors
+        # acceleration cost factors
         for t in range(T - 1):
             G.add_edge(f"u_{t}", f"u_{t+1}", label="acceleration cost")
-        # Add start, goal, and intermediate constraints
+        
         G.add_edge("start", "q_0", label="start")
         G.add_edge(f"q_{T}", "goal", label="goal")
         G.add_edge(f"q_{T//3}", "x0_in", label="intermediate_1")
@@ -224,7 +224,7 @@ def main():
 
 
 
-    visualize_factor_graph(T=min(5, T))  # Visualize a smaller graph for clarity
+    visualize_factor_graph(T=min(5, T))  
 
 if __name__ == "__main__":
     main()
