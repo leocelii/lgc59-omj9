@@ -151,17 +151,17 @@ def main():
 
 
 #---Joint angles over time animation---
-    # time_steps = np.arange(factor_graph.num_states) * dt
+    time_steps = np.arange(factor_graph.num_states) * dt
 
-    # plt.figure()
-    # plt.plot(time_steps, optimized_positions[:, 0], label='Theta 0')
-    # plt.plot(time_steps, optimized_positions[:, 1], label='Theta 1')
-    # plt.title('Joint Angles Over Time')
-    # plt.xlabel('Time (s)')
-    # plt.ylabel('Joint Angle (rad)')
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
+    plt.figure()
+    plt.plot(time_steps, optimized_positions[:, 0], label='Theta 0')
+    plt.plot(time_steps, optimized_positions[:, 1], label='Theta 1')
+    plt.title('Joint Angles Over Time')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Joint Angle (rad)')
+    plt.legend()
+    plt.grid()
+    plt.show()
 #---Angular Velocities over time animation---
     # time_steps_u = np.arange(factor_graph.num_controls) * dt
 

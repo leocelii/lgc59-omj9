@@ -149,32 +149,32 @@ def main():
 
 # --- we can uncomment all these for way more visualizations ---
     # Plot velocity profile
-    # velocities = optimized_controls
-    # velocity_magnitudes = np.linalg.norm(velocities, axis=1)
-    # time_steps = np.arange(factor_graph.num_controls) * dt
+    velocities = optimized_controls
+    velocity_magnitudes = np.linalg.norm(velocities, axis=1)
+    time_steps = np.arange(factor_graph.num_controls) * dt
 
-    # plt.figure()
-    # plt.plot(time_steps, velocity_magnitudes, label='Velocity Magnitude')
-    # plt.title('Velocity Profile Over Time')
-    # plt.xlabel('Time (s)')
-    # plt.ylabel('Velocity Magnitude')
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
+    plt.figure()
+    plt.plot(time_steps, velocity_magnitudes, label='Velocity Magnitude')
+    plt.title('Velocity Profile Over Time')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Velocity Magnitude')
+    plt.legend()
+    plt.grid()
+    plt.show()
 
-    # # Plot acceleration profile
-    # accelerations = np.diff(optimized_controls, axis=0) / dt
-    # acceleration_magnitudes = np.linalg.norm(accelerations, axis=1)
-    # time_steps_acc = np.arange(factor_graph.num_controls - 1) * dt
+    # Plot acceleration profile
+    accelerations = np.diff(optimized_controls, axis=0) / dt
+    acceleration_magnitudes = np.linalg.norm(accelerations, axis=1)
+    time_steps_acc = np.arange(factor_graph.num_controls - 1) * dt
 
-    # plt.figure()
-    # plt.plot(time_steps_acc, acceleration_magnitudes, label='Acceleration Magnitude')
-    # plt.title('Acceleration Profile Over Time')
-    # plt.xlabel('Time (s)')
-    # plt.ylabel('Acceleration Magnitude')
-    # plt.legend()
-    # plt.grid()
-    # plt.show()
+    plt.figure()
+    plt.plot(time_steps_acc, acceleration_magnitudes, label='Acceleration Magnitude')
+    plt.title('Acceleration Profile Over Time')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Acceleration Magnitude')
+    plt.legend()
+    plt.grid()
+    plt.show()
 
     # Visualize the Factor Graph
     def visualize_factor_graph(T):
